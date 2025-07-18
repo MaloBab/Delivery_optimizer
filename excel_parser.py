@@ -22,7 +22,7 @@ def detect_header(df):
             return i, values[start:end]
     return None, []
 
-def parse_excel(path, use_dataframe=True, expected_sheets=None):
+def parse_excel(path, use_dataframe=True, expected_sheets=None, column_mapping=None):
     xl = pd.read_excel(path, sheet_name=None, dtype=object, header=None)
     result = {}
     for sheet_name, df in xl.items():
@@ -36,5 +36,10 @@ def parse_excel(path, use_dataframe=True, expected_sheets=None):
         df_data = df_data.iloc[:, :len(headers)]
         df_data.columns = headers
         df_data = df_data.replace({np.nan: None})
+        
+        # ✨ Harmonisation des colonnes si mapping fourni
+        if column_mapping:
+            df_data.rename(columns=column_mapping, inplace=True)
+        
         result[sheet_name] = df_data.reset_index(drop=True) if use_dataframe else df_data.to_dict(orient="records")
     return result
